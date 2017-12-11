@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
@@ -55,5 +56,39 @@ describe('POST /todos', () => {
                     done();
                 }).catch((e) => done(e));
             });
+    });
+    it('Should return the todo with the sent id', (done) => {
+        let todos = [{
+            text: "First todo",
+        },{
+            text: "Second todo",
+        }];
+        Todo.insertMany(todos).then((todos) => {
+            let todo = todos[0];
+            return todo;
+        }).then((todo) => {
+            request(app)
+                .get('/todos/' + todo._id)
+                .expect(200)
+                .expect((res) => {
+                    expect(todo._doc._id.toHexString()).to.equal(res.body.todo._id);
+                    //expect(JSON.stringify(todo)).to.equal(JSON.stringify(res.body.todo));
+                    done();
+                }).catch((err) => done(err));
+        });
+    });
+    it('Should return 404 if todo is not found', (done) => {
+        request(app)
+            .get('/todos/abceee2af7bc913c572b0ba9')
+            .expect(404)
+            .catch((err) => done(err));
+        done();
+    });
+    it('Should return a 400 if invalid id is passed in', (done) => {
+        request(app)
+            .get('/todos/abc')
+            .expect(400)
+            .catch((err) => done(err));
+        done();
     });
 });
