@@ -18,6 +18,16 @@ app.post('/Todos', (req, res) => {
         console.log('Failed to save, ', err);
     });
 });
+app.get('/Todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({
+            todos
+        })
+    }).catch((err) => {
+        console.log(err);
+        res.status(400).send(err);
+    });
+});
 
 app.listen(3000, () => {
     console.log('Started on port 3000');
