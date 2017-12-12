@@ -16,25 +16,25 @@ app.post('/todos', (req, res) => {
     var todo = new Todo({
         text: req.body.text,
     });
-    todo.save().then((doc) => {
-        res.send(doc);
+    todo.save().then((doc, err) => {
+        res
+            .status(200)
+            .send({doc});
     }).catch((err) => {
         res
             .status(400)
             .send(err);
-        console.log('Failed to save, ', err);
     });
 });
 app.get('/todos', (req, res) => {
-    Todo.find().then((todos) => {
-        res.send({
-            todos
-        })
-    }).catch((err) => {
-        console.log(err);
-        res
-            .status(400)
-            .send(err);
+    Todo.find().then((todos, err) => {
+        if (err) {
+            res
+                .status(400)
+                .send(err);
+        } else {
+            res.send({todos});
+        }
     });
 });
 
@@ -44,19 +44,23 @@ app.get('/todos/:id', (req, res) => {
         res
             .status(400)
             .send('Invalid Id');
+    } else {
+        Todo.findById(todoId).then((todo, err) => {
+            if(err) {
+                res
+                    .status(400)
+                    .send('Exception: ' + err.message);
+            } else if(!todo){
+                res
+                    .status(404)
+                    .send('Todo not found');
+            } else {
+                res
+                    .status(200)
+                    .send({todo});
+            }
+        });
     }
-    Todo.findById(todoId).then((todo) => {
-        if(!todo){
-            res
-                .status(404)
-                .send('Todo not found');
-        }
-        res.send({todo});
-    }).catch((err) => {
-        res
-            .status(400)
-            .send('Exception: ' + err.message);
-    });
 });
 
 app.delete('/todos/:id', (req, res) => {
@@ -66,17 +70,22 @@ app.delete('/todos/:id', (req, res) => {
             .status(400)
             .send('Invalid Id');
     }
-    Todo.findByIdAndRemove(todoId).then((todo) => {
+    Todo.findByIdAndRemove(todoId).then((todo, err) => {
         if(!todo){
             res
                 .status(404)
                 .send('Todo not found');
         }
-        res.send({todo});
-    }).catch((err) => {
-        res
-            .status(400)
-            .send('Exception: ' + err.message);
+        else if(err) {
+            res
+                .status(400)
+                .send('Exception: ' + err.message);
+        } else {
+            res
+                .status(200)
+                .send({todo});
+        }
+
     });
 });
 

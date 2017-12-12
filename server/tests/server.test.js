@@ -5,16 +5,18 @@ const {ObjectID} = require('mongodb');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
-let todos = [{
-    text: "First todo",
-}, {
-    text: "Second todo",
-}];
+
 beforeEach((done) => {
+    let todos = [{
+        text: "First todo",
+    }, {
+        text: "Second todo",
+    }];
     Todo.remove({}).then(() => {
         return Todo.insertMany(todos);
     }).then(() => done());
 });
+
 describe('POST /todos', () => {
     it('should create a new todo', (done) => {
         request(app)
@@ -22,29 +24,20 @@ describe('POST /todos', () => {
             .send({text: "test"})
             .expect(200)
             .expect((res) => {
-                expect(res.body.text).to.equal("test");
-                done();
+                expect(res.body.doc.text).to.equal("test");
             }).catch((err) => done(err));
+        done();
     });
 
     it('Should not create todo with invalid data', (done) => {
-        let text = '';
         request(app)
             .post('/todos')
-            .send({text})
+            .send({text: ''})
             .expect(400)
             .expect((res) => {
-                expect(res.body.errors.text.message).to.equal("Path `text` is required.");
-            })
-            .end((err) => {
-                if (err) {
-                    return done(err);
-                }
-                Todo.find().then((todos) => {
-                    expect(todos.length).to.equal(2);
-                    done();
-                }).catch((e) => done(e));
-            });
+                expect(res.body.name).to.equal('ValidationError');
+            }).catch((err) => done(err));
+        done();
     });
 });
 describe('POST /todos/:id', () => {
@@ -113,15 +106,13 @@ describe('DELETE /todos/:id', () => {
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .delete('/todos/abceee2af7bc913c572b0ba9')
-            .expect(404)
-            .catch((err) => done(err));
+            .expect(404);
         done();
     });
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .delete('/todos/abc')
-            .expect(400)
-            .catch((err) => done(err));
+            .expect(400);
         done();
     });
 });
@@ -150,15 +141,13 @@ describe('PATCH /todos/:id', () => {
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .patch('/todos/abceee2af7bc913c572b0ba9')
-            .expect(404)
-            .catch((err) => done(err));
+            .expect(404);
         done();
     });
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .patch('/todos/abc')
-            .expect(400)
-            .catch((err) => done(err));
+            .expect(400);
         done();
     });
 });
