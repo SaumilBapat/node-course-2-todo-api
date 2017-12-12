@@ -17,24 +17,14 @@ beforeEach((done) => {
 });
 describe('POST /todos', () => {
     it('should create a new todo', (done) => {
-        let text = 'Todo test';
         request(app)
             .post('/todos')
-            .send({text})
+            .send({text: "test"})
             .expect(200)
             .expect((res) => {
-                expect(res.body.text).to.equal(text);
-            })
-            .end((err) => {
-                if(err) {
-                    return done(err);
-                }
-                Todo.find().then((todos) => {
-                    expect(todos.length).to.equal(3);
-                    expect(todos[2].text).to.equal(text);
-                    done();
-                }).catch((e) => done(e));
-            })
+                expect(res.body.text).to.equal("test");
+                done();
+            }).catch((err) => done(err));
     });
 
     it('Should not create todo with invalid data', (done) => {
