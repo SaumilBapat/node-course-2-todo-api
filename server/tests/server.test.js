@@ -16,7 +16,6 @@ beforeEach((done) => {
     }).then(() => done());
 });
 describe('POST /todos', () => {
-
     it('should create a new todo', (done) => {
         let text = 'Todo test';
         request(app)
@@ -57,6 +56,8 @@ describe('POST /todos', () => {
                 }).catch((e) => done(e));
             });
     });
+});
+describe('POST /todos/:id', () => {
     it('Should return the todo with the sent id', (done) => {
         let todos = [{
             text: "First todo",
@@ -87,6 +88,48 @@ describe('POST /todos', () => {
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .get('/todos/abc')
+            .expect(400)
+            .catch((err) => done(err));
+        done();
+    });
+});
+describe('DELETE /todos/:id', () => {
+    it('Should delete the todo with the sent id', (done) => {
+        let todos = [{
+            text: "First todo",
+        },{
+            text: "Second todo",
+        }];
+        Todo.insertMany(todos).then((todos) => {
+            return todos[0];
+        }).then((todo) => {
+            request(app)
+            .delete('/todos/' + todo._id)
+            .expect(200)
+            .expect((res) => {
+                expect(todo._doc._id.toHexString()).to.equal(res.body.todo._id);
+            });
+            return todo;
+        }).then((todo) => {
+            Todo
+                .findById(todo._id)
+                .then((todo) => {
+                    expect(todo).to.be.null;
+                })
+                .catch((err) => done(err));
+        }).catch((err) => done(err));
+        done();
+    });
+    it('Should return 404 if todo is not found', (done) => {
+        request(app)
+            .delete('/todos/abceee2af7bc913c572b0ba9')
+            .expect(404)
+            .catch((err) => done(err));
+        done();
+    });
+    it('Should return a 400 if invalid id is passed in', (done) => {
+        request(app)
+            .delete('/todos/abc')
             .expect(400)
             .catch((err) => done(err));
         done();

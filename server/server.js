@@ -16,7 +16,9 @@ app.post('/todos', (req, res) => {
     todo.save().then((doc) => {
         res.send(doc);
     }).catch((err) => {
-        res.status(400).send(err);
+        res
+            .status(400)
+            .send(err);
         console.log('Failed to save, ', err);
     });
 });
@@ -27,25 +29,51 @@ app.get('/todos', (req, res) => {
         })
     }).catch((err) => {
         console.log(err);
-        res.status(400).send(err);
+        res
+            .status(400)
+            .send(err);
     });
 });
 
 app.get('/todos/:id', (req, res) => {
     const todoId = req.params.id;
     if(!ObjectID.isValid(todoId)) {
-        res.status(400);
-        res.send('Invalid Id');
+        res
+            .status(400)
+            .send('Invalid Id');
     }
     Todo.findById(todoId).then((todo) => {
         if(!todo){
-            res.status(404);
-            res.send('Todo not found');
+            res
+                .status(404)
+                .send('Todo not found');
         }
         res.send({todo});
     }).catch((err) => {
-        res.status(400);
-        res.send('Exception: ', err.message);
+        res
+            .status(400)
+            .send('Exception: ' + err.message);
+    });
+});
+
+app.delete('/todos/:id', (req, res) => {
+    const todoId = req.params.id;
+    if(!ObjectID.isValid(todoId)) {
+        res
+            .status(400)
+            .send('Invalid Id');
+    }
+    Todo.findByIdAndRemove(todoId).then((todo) => {
+        if(!todo){
+            res
+                .status(404)
+                .send('Todo not found');
+        }
+        res.send({todo});
+    }).catch((err) => {
+        res
+            .status(400)
+            .send('Exception: ' + err.message);
     });
 });
 
