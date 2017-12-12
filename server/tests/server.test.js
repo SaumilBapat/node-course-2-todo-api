@@ -135,3 +135,40 @@ describe('DELETE /todos/:id', () => {
         done();
     });
 });
+describe('PATCH /todos/:id', () => {
+    it('Should update the todo with the sent id', (done) => {
+        let todoData = [{
+            text: "First todo",
+        },{
+            text: "Second todo",
+        }];
+        Todo.insertMany(todoData).then((todos) => {
+            return todos[0];
+        }).then((todo) => {
+            request(app)
+                .patch('/todos/' + todo._id)
+                .send({text: 'Updated via patch'})
+                .expect(200)
+                .expect((res) => {
+                    Todo.find({_id: new ObjectID(res.body.todo._id)}).then((todos) => {
+                        expect(todos[0].text).to.equal('Updated via patch');
+                    });
+                    done();
+                }).catch((err) => done(err));
+        });
+    });
+    it('Should return 404 if todo is not found', (done) => {
+        request(app)
+            .patch('/todos/abceee2af7bc913c572b0ba9')
+            .expect(404)
+            .catch((err) => done(err));
+        done();
+    });
+    it('Should return a 400 if invalid id is passed in', (done) => {
+        request(app)
+            .patch('/todos/abc')
+            .expect(400)
+            .catch((err) => done(err));
+        done();
+    });
+});
