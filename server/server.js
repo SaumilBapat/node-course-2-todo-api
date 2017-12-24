@@ -127,6 +127,26 @@ app.listen(port, () => {
     console.log(`Started on port ${port}`);
 });
 
+app.post('/users', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    var user = new User({
+        email: body.email,
+        password: body.password,
+    });
+    user.save().then(() => user.generateAuthToken())
+        .then((token) => {
+        console.log(`Received token ${token}`);
+        res
+            .status(200)
+            .header('x-auth', token)
+            .send(user);
+    }).catch((err) => {
+        res
+            .status(400)
+            .send(err);
+    });
+});
+
 module.exports = {app};
 
 
