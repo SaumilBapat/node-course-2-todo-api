@@ -142,14 +142,30 @@ app.post('/users', (req, res) => {
     user.save().then(() => user.generateAuthToken())
         .then((token) => {
         console.log(`Received token ${token}`);
-        res
+        return res
             .status(200)
             .header('x-auth', token)
             .send(user);
     }).catch((err) => {
-        res
+        return res
             .status(400)
             .send(err);
+    });
+});
+
+app.post('/users/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            return res
+                .status(200)
+                .header('x-auth', token)
+                .send(user);
+        });
+    }).catch((e) => {
+        return res
+            .status(400)
+            .send();
     });
 });
 
