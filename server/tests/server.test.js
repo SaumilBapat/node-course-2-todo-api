@@ -279,4 +279,18 @@ describe('Get /users/me', () => {
                 .catch((err) => done(err));
         });
     });
+    describe('DELETE /users/me/token', () => {
+        it('Should remove auth token on logout', (done) => {
+            request(app)
+                .delete('/users/me/token')
+                .set('x-auth', users[0].tokens[0].token)
+                .expect(200)
+                .expect((res) => {
+                    User.findById(users[0]._id).then((user) => {
+                        should.equal(user.tokens.length, 0);
+                        done();
+                    }).catch((err) => done(err));
+                }).catch((err) => done(err));
+        });
+    });
 });
