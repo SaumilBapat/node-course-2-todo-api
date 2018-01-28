@@ -276,7 +276,7 @@ describe('Get /users/me', () => {
                         return done(err);
                     }
                     User.findById(users[1]._id).then((user) => {
-                        (user.tokens[0]).should.include({
+                        (user.tokens[1]).should.include({
                             access: 'auth',
                             token: res.headers['x-auth'],
                         });
