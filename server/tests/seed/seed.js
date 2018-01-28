@@ -20,11 +20,13 @@ let users = [{
 let todos = [{
     _id: new ObjectID(),
     text: "First todo",
+    _creator: userOneId,
 }, {
     _id: new ObjectID(),
     text: "Second todo",
     completed: true,
     completedAt: 333,
+    _creator: userTwoId,
 }];
 
 let populateTodos = (done) => {

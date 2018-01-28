@@ -22,9 +22,10 @@ const {authenticate} = require("./middleware/authenticate");
 var app = express();
 var port = process.env.PORT;
 app.use(bodyParser.json());
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
     var todo = new Todo({
         text: req.body.text,
+        _creator: req.user._id,
     });
     todo.save().then((doc, err) => {
         return res
@@ -36,8 +37,10 @@ app.post('/todos', (req, res) => {
             .send(err);
     });
 });
-app.get('/todos', (req, res) => {
-    Todo.find().then((todos, err) => {
+app.get('/todos', authenticate, (req, res) => {
+    Todo.find({
+      _creator: req.user._id,
+    }).then((todos, err) => {
         if (err) {
             return res
                 .status(400)

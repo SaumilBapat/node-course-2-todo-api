@@ -15,6 +15,7 @@ describe('POST /todos', () => {
     it('should create a new todo', (done) => {
         request(app)
             .post('/todos')
+            .set('x-auth', users[0].tokens[0].token)
             .send({text: "test"})
             .expect(200)
             .expect((res) => {
@@ -27,6 +28,7 @@ describe('POST /todos', () => {
     it('Should not create todo with invalid data', (done) => {
         request(app)
             .post('/todos')
+            .set('x-auth', users[0].tokens[0].token)
             .send({text: ''})
             .expect(400)
             .expect((res) => {
@@ -40,8 +42,10 @@ describe('GET /todos/:id', () => {
     it('Should return the todo with the sent id', (done) => {
         let todos = [{
             text: "First todo",
+            _creator: users[0]._id,
         },{
             text: "Second todo",
+            _creator: users[0]._id,
         }];
         Todo.insertMany(todos).then((todos) => {
             let todo = todos[0];
@@ -49,6 +53,7 @@ describe('GET /todos/:id', () => {
         }).then((todo) => {
             request(app)
                 .get('/todos/' + todo._id)
+                .set('x-auth', users[0].tokens[0].token)
                 .expect(200)
                 .expect((res) => {
                   (todo._id.toString()).should.equal(res.body.todo._id);
@@ -59,6 +64,7 @@ describe('GET /todos/:id', () => {
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .get('/todos/abceee2af7bc913c572b0ba9')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(404)
             .catch((err) => done(err));
             done();
@@ -66,6 +72,7 @@ describe('GET /todos/:id', () => {
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .get('/todos/abc1')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(400)
             .catch((err) => done(err));
             done();
@@ -75,8 +82,10 @@ describe('DELETE /todos/:id', () => {
     it('Should delete the todo with the sent id', (done) => {
       let todos = [{
             text: "First todo",
+            _creator: users[0]._id,
         },{
             text: "Second todo",
+            _creator: users[0]._id,
         }];
         Todo.insertMany(todos).then((todos) => {
             let todo = todos[0];
@@ -84,6 +93,7 @@ describe('DELETE /todos/:id', () => {
         }).then((todo) => {
           request(app)
               .del('/todos/' + todo._id)
+              .set('x-auth', users[0].tokens[0].token)
               .expect(200)
               .catch((err) => done(err));
             return todos;
@@ -100,6 +110,7 @@ describe('DELETE /todos/:id', () => {
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .delete('/todos/abceee2af7bc913c572b0ba9')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(404)
             .catch((err) => done(err));
             done();
@@ -107,6 +118,7 @@ describe('DELETE /todos/:id', () => {
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .delete('/todos/abc2')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(400)
             .catch((err) => done(err));
             done();
@@ -116,14 +128,17 @@ describe('PATCH /todos/:id', () => {
     it('Should update the todo with the sent id', (done) => {
         let todoData = [{
             text: "First todo",
+            _creator: users[0]._id,
         },{
             text: "Second todo",
+            _creator: users[0]._id,
         }];
         Todo.insertMany(todoData).then((todos) => {
             return todos[0];
         }).then((todo) => {
             request(app)
                 .patch('/todos/' + todo._id)
+                .set('x-auth', users[0].tokens[0].token)
                 .send({text: 'Updated via patch'})
                 .expect(200)
                 .expect((res) => {
@@ -136,6 +151,7 @@ describe('PATCH /todos/:id', () => {
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .patch('/todos/abceee2af7bc913c572b0ba9')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(404)
             .catch((err) => done(err));
             done();
@@ -143,6 +159,7 @@ describe('PATCH /todos/:id', () => {
     it('Should return a 400 if invalid id is passed in', (done) => {
         request(app)
             .patch('/todos/abc3')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(400)
             .catch((err) => done(err));
             done();
@@ -150,8 +167,10 @@ describe('PATCH /todos/:id', () => {
     it('should clear completedAt when todo is not completed', (done) => {
       let todoData = [{
           text: "First todo",
+          _creator: users[0]._id,
       },{
           text: "Second todo",
+          _creator: users[0]._id,
       }];
       Todo.insertMany(todoData).then((todos) => {
           return todos;
@@ -160,6 +179,7 @@ describe('PATCH /todos/:id', () => {
         let text = 'This is the new text';
         request(app)
         .patch(`/todos/${hexId}`)
+        .set('x-auth', users[0].tokens[0].token)
         .send({
           completed: false,
           text
