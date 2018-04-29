@@ -127,27 +127,16 @@ describe('DELETE /todos/:id', () => {
 });
 describe('PATCH /todos/:id', () => {
     it('Should update the todo with the sent id', (done) => {
-        let todoData = [{
-            text: "First todo",
-            _creator: users[0]._id,
-        },{
-            text: "Second todo",
-            _creator: users[0]._id,
-        }];
-        Todo.insertMany(todoData).then((todos) => {
-            return todos[0];
-        }).then((todo) => {
-            request(app)
-                .patch('/todos/' + todo._id)
-                .set('x-auth', users[0].tokens[0].token)
-                .send({text: 'Updated via patch'})
-                .expect(200)
-                .expect((res) => {
-                    Todo.find({_id: new ObjectID(res.body.todo._id)}).then((todos) => {
-                        expect(todos[0].text).to.equal('Updated via patch');
-                    }).then((todo) => done());
-                }).catch((err) => done(err));
-        });
+        request(app)
+            .patch('/todos/' + todos[0]._id)
+            .set('x-auth', users[0].tokens[0].token)
+            .send({text: 'Updated via patch'})
+            .expect(200)
+            .expect((res) => {
+                Todo.find({_id: new ObjectID(res.body.todo._id)}).then((todos) => {
+                    expect(todos[0].text).to.equal('Updated via patch');
+                }).then((todo) => done());
+            }).catch((err) => done(err));
     });
     it('Should return 404 if todo is not found', (done) => {
         request(app)
