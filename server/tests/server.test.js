@@ -138,6 +138,15 @@ describe('PATCH /todos/:id', () => {
                 }).then((todo) => done());
             }).catch((err) => done(err));
     });
+    it('Should not update the todo with the wrong user id', (done) => {
+        request(app)
+            .patch('/todos/' + todos[0]._id)
+            .set('x-auth', users[1].tokens[0].token)
+            .send({text: 'Updated via patch'})
+            .expect(404)
+            .catch((err) => done(err));
+            done();
+    });
     it('Should return 404 if todo is not found', (done) => {
         request(app)
             .patch('/todos/abceee2af7bc913c572b0ba9')
