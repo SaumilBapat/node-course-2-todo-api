@@ -40,26 +40,23 @@ describe('POST /todos', () => {
 });
 describe('GET /todos/:id', () => {
     it('Should return the todo with the sent id', (done) => {
-        let todos = [{
-            text: "First todo",
-            _creator: users[0]._id,
-        },{
-            text: "Second todo",
-            _creator: users[0]._id,
-        }];
-        Todo.insertMany(todos).then((todos) => {
-            let todo = todos[0];
-            return todo;
-        }).then((todo) => {
-            request(app)
-                .get('/todos/' + todo._id)
-                .set('x-auth', users[0].tokens[0].token)
-                .expect(200)
-                .expect((res) => {
-                  (todo._id.toString()).should.equal(res.body.todo._id);
-                  done();
-                }).catch((err) => done(err));
-        });
+        request(app)
+            .get('/todos/' + todos[0]._id)
+            .set('x-auth', users[0].tokens[0].token)
+            .expect(200)
+            .expect((res) => {
+              (todos[0]._id.toString()).should.equal(res.body.todo._id);
+              done();
+            }).catch((err) => done(err));
+    });
+    it('Should not return the todo with the wrong id', (done) => {
+        request(app)
+            .get('/todos/' + todos[0]._id)
+            .set('x-auth', users[1].tokens[0].token)
+            .expect(404)
+            .expect((res) => {
+              done();
+            }).catch((err) => done(err));
     });
     it('Should return 404 if todo is not found', (done) => {
         request(app)
@@ -80,32 +77,36 @@ describe('GET /todos/:id', () => {
 });
 describe('DELETE /todos/:id', () => {
     it('Should delete the todo with the sent id', (done) => {
-      let todos = [{
-            text: "First todo",
-            _creator: users[0]._id,
-        },{
-            text: "Second todo",
-            _creator: users[0]._id,
-        }];
-        Todo.insertMany(todos).then((todos) => {
-            let todo = todos[0];
-            return todo;
-        }).then((todo) => {
           request(app)
-              .del('/todos/' + todo._id)
+              .del('/todos/' + todos[0]._id)
               .set('x-auth', users[0].tokens[0].token)
               .expect(200)
+              .then(() => {
+                  Todo
+                      .findById(todos[0]._id)
+                      .then((todo) => {
+                          should.equal(todo, null);
+                          done();
+                      })
+                      .catch((err) => done(err));
+              })
               .catch((err) => done(err));
-            return todos;
-        }).then((todos) => {
-            Todo
-                .findById(todos[0]._id)
-                .then((todo) => {
-                    should.equal(todo, null);
-                    done();
-                })
-                .catch((err) => done(err));
-        }).catch((err) => done(err));
+    });
+    it('Should not delete the todo with the sent id', (done) => {
+      request(app)
+          .del('/todos/' + todos[0]._id)
+          .set('x-auth', users[1].tokens[0].token)
+          .expect(404)
+          .then(() => {
+              Todo
+                  .findById(todos[0]._id)
+                  .then((todo) => {
+                      should.equal(todo.text, todos[0].text);
+                      done();
+                  })
+                  .catch((err) => done(err));
+          })
+          .catch((err) => done(err));
     });
     it('Should return 404 if todo is not found', (done) => {
         request(app)

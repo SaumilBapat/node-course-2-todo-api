@@ -79,7 +79,7 @@ app.get('/todos/:id', authenticate, (req, res) => {
     }
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
 
     const todoId = req.params.id;
     if(!ObjectID.isValid(todoId)) {
@@ -87,7 +87,10 @@ app.delete('/todos/:id', (req, res) => {
             .status(400)
             .send('Invalid Id');
     }
-    Todo.findByIdAndRemove(todoId).then((todo, err) => {
+    Todo.findOneAndRemove({
+        _id: todoId,
+        _creator: req.user._id,
+    }).then((todo, err) => {
         if(!todo){
             return res
                 .status(404)
